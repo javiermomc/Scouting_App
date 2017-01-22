@@ -1,0 +1,45 @@
+<!--
+  This template loads for the 'tab.friend-detail' state (app.js)
+  'friend' is a $scope variable created in the FriendsCtrl controller (controllers.js)
+  The FriendsCtrl pulls data from the Friends service (service.js)
+  The Friends service returns an array of friend data
+-->
+<ion-view view-title="{{team.name}}">
+  <ion-nav-buttons side="right">
+    <a class="button button-icon icon ion-loop" ng-click="refresh()">
+    </a>
+  </ion-nav-buttons>
+  <ion-content>
+    <ion-scroll direction="xy" zooming="true">
+      <div style="width: 550px; height: 900px;">
+        <div class="row">
+          <div class="col data">Match</div>
+          <div class="col data">Score</div>
+          <div class="col data">Points</div>
+          <div class="col data">Autonomous</div>
+          <div class="col data">Teleop</div>
+          <div class="col data">Comments</div>
+          <div class="col data">By</div>
+        </div>
+        <div ng-repeat="matches in matches" class="row">
+          <div class="col data">{{matches.match}}</div>
+          <div class="col data"><button class="button button-small button-clear button-dark" ng-click="editMatchScoreButton(matches.id)">{{matches.score}}</button></div>
+          <div class="col data"><button class="button button-small button-clear button-dark" ng-click="editMatchPointsButton(matches.id)">{{matches.points}}</button></div>
+          <div class="col data"><button class="button button-small button-clear button-dark" ng-click="editMatchAutoButton(matches.id)">{{matches.auto}}</button></div>
+          <div class="col data"><button class="button button-small button-clear button-dark" ng-click="editMatchTeleopButton(matches.id)">{{matches.teleop}}</button></div>
+          <div class="col data"><button class="button button-small button-clear button-dark data" ng-click="editMatchCommentButton(matches.id)">
+            <ion-scroll style="height: 30px; width: 70px">{{matches.comment}}</ion-scroll>
+          </button></div>
+          <div class="col data">{{matches.creator}}</div>
+        </div>
+      </div>
+    </ion-scroll>
+  </ion-content>
+  <div class="float-button">
+  <span class="height-fix">
+    <a href="#/tab/addMatch" class="content">
+      <i class="ion-plus-round"></i>
+    </a>
+  </span>
+  </div>
+</ion-view>

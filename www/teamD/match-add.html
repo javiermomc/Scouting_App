@@ -1,0 +1,31 @@
+<ion-view view-title="Add Match">
+  <ion-content>
+    <div class="paddingAdd">
+      <div class="list">
+        <label class="item item-input">
+        <input type="number" placeholder="Number of match" ng-model="data.match"/>
+        </label>
+        <label class="item item-input">
+          <input type="text" placeholder="Team number/Team name" ng-model="data.team"/>
+        </label>
+        <label class="item item-input">
+          <input type="number" placeholder="Score" ng-model="data.score"/>
+        </label>
+        <label class="item item-input">
+          <input type="number" placeholder="Points" ng-model="data.points"/>
+        </label>
+        <label class="item item-input">
+          <input type="number" placeholder="Auto" ng-model="data.auto"/>
+        </label>
+        <label class="item item-input">
+          <input type="number" placeholder="Teleop" ng-model="data.teleop"/>
+        </label>
+        <label class="item item-input">
+          <input type="text" placeholder="Comments" ng-model="data.comment"/>
+        </label>
+      </div>
+      <button class="button button-positive" ng-click="submitButton()">Submit</button>
+    </div>
+
+  </ion-content>
+</ion-view>
