@@ -1,20 +1,28 @@
-angular.module('starter.controllers', [])
+angular.module('starter.controllers', ['ngCordova'])
   .controller('Sign', function($scope){
     $scope.signInButton = function(){location.href = '#/signIn'};
     $scope.signUpButton = function(){location.href = '#/signUp'};
   })
   .controller('SignIn', function($scope,$rootScope,$ionicHistory,$ionicPopup){
     $scope.data = {};
-    $scope.skipSign = function(){location.href = '#/regional'};
     $scope.signIn = function(){
     var email = $scope.data.email; var password= $scope.data.password;
-      if(firebase.auth().signInWithEmailAndPassword(email, password).then(function(){location.href = '#/regional'},function(error){
-          console.log(error.code);
-          console.log(error.message);
-        })
-      ){
-        location.href = '#/regional';
-      }
+      firebase.auth().signInWithEmailAndPassword(email, password).then(function(){location.href = '#/regional'},function(error){
+        console.log(error.code);
+        console.log(error.message);
+        if (error.code == 'auth/invalid-email') {
+          $ionicPopup.alert({
+            title: 'Authentication Error',
+            template: 'Invalid email'
+          });
+        }
+        if (error.code == 'auth/wrong-password') {
+          $ionicPopup.alert({
+            title: 'Authentication Error',
+            template: 'Wrong password'
+          });
+        }
+      });
     };
   })
   .controller('SignUp', function($scope, $ionicPopup, $ionicHistory){
@@ -106,7 +114,7 @@ angular.module('starter.controllers', [])
       }
     }
   })
-  .controller('AddTeamCtrl', function ($scope, Teams, $ionicPopup, $ionicHistory) {
+  .controller('AddTeamCtrl', function ($scope, Teams, $ionicPopup, $ionicHistory, $cordovaFile) {
     $scope.data = {};
     var uri = '';
     var options = {
@@ -114,29 +122,59 @@ angular.module('starter.controllers', [])
       height: 800,
       quality: 50
     };
+    var imgRoot;
     $scope.imgPic = function() {
       console.log('Image Picker!!!');
-      /*
-      try {
-      $cordovaImagePicker.getPictures(options)
-        .then(function (results) {
+      window.imagePicker.getPictures(
+        function(results) {
           for (var i = 0; i < results.length; i++) {
             console.log('Image URI: ' + results[i]);
+            imgRoot = results;
           }
         }, function (error) {
-          // error getting photos
-        });
-    }catch(error){
-        console.log(error);
-      }*/
+          console.log('Error: ' + error);
+        }, {
+          maximumImagesCount: 1,
+          // quality of resized image, defaults to 100
+          quality: 40
+        }
+      );
     };
     $scope.submitButton = function () {
       if(!$scope.data.name||!$scope.data.number) var alertPopup = $ionicPopup.alert({title: 'You can\'t leave blanks!!!'});
       else if(typeof($scope.data.number)!=typeof (0)) var alertPopup = $ionicPopup.alert({title: 'Team number must be a number!!!'});
       else {
-        Teams.add($scope.data.name,$scope.data.number, uri);
-        $ionicHistory.goBack();
+        console.log('Uploading!!!');
+        imgRoot = imgRoot.toString();
+        imgProcessing(imgRoot, $scope.data.number);
       }
+    };
+    function imgProcessing(pathImg, name) {
+      var mainRoot = pathImg.substring(0, pathImg.lastIndexOf('/') + 1),
+        mainFile = pathImg.substring(pathImg.lastIndexOf('/') + 1, pathImg.length),
+        fileName = new Date().valueOf() + mainFile;
+
+      $cordovaFile.readAsArrayBuffer(mainRoot, mainFile)
+        .then(function (success) {
+          var blob = new Blob([success], {type: 'image/jpeg'});
+          upload(blob, name);
+        }, function (error) {
+          console.error(error);
+        });
+    }
+    function upload(file, name) {
+      var uploadTask = firebase.storage().ref('/teams').child('/'+name).put(file);
+        uploadTask.on('state_changed', function (snapshot) {
+        console.info(snapshot);
+      }, function (error) {
+        console.log(error.code);
+        console.log(error.message);
+      }, function(){
+          var downloadURL = uploadTask.snapshot.downloadURL;
+          console.log(downloadURL);
+          Teams.add($scope.data.name,$scope.data.number, downloadURL);
+          $ionicHistory.goBack();
+        });
     }
 
   })

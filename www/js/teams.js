@@ -9,22 +9,23 @@ angular.module('starter.teams', [])
     database.ref("/"+regional+"/teams").orderByChild('id').on('child_added', function(data){
       database.ref('/'+regional+'/teams/'+data.key).set({
         'id': teams.length,
-        'teamNumber': data.val().teamNumber
+        'teamNumber': data.val().teamNumber,
+        'img': data.val().img
       });
       teams.push({
         'id': teams.length,
         'name': data.key,
-        'teamNumber': data.val().teamNumber
+        'teamNumber': data.val().teamNumber,
+        'img': data.val().img
       });
     });
-    console.log(teams);
   };
   var addDatabaseTeam = function(team, regional){
     updateDatabaseTeams(regional);
     database.ref('/'+regional+"/teams").child('/'+team.name).set({
       'id': teams.length-1,
       'teamNumber': team.teamNumber,
-      // 'img': team.img
+      'img': team.img
       });
   };
   return {
@@ -36,6 +37,10 @@ angular.module('starter.teams', [])
       updateDatabaseTeams(regional);
     },
     remove: function(team, Matches) {
+      firebase.storage().ref('/teams/'+team.teamNumber).delete().catch(function(error) {
+        console.log(error.code);
+        console.log(error.message);
+      });
       teams.splice(teams.indexOf(team),1);
       database.ref('/'+regional+'/teams/'+team.name).remove();
       matches = Matches.all();
@@ -57,8 +62,8 @@ angular.module('starter.teams', [])
       var team = {
         'id':teams.length,
         'name': name,
-        'teamNumber':number
-        // 'img': img
+        'teamNumber':number,
+        'img': img
       };
       addDatabaseTeam(team, regional);
       updateDatabaseTeams(regional);
