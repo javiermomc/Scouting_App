@@ -114,22 +114,16 @@ angular.module('starter.controllers', ['ngCordova'])
       }
     }
   })
-  .controller('AddTeamCtrl', function ($scope, Teams, $ionicPopup, $ionicHistory, $cordovaFile) {
+  .controller('AddTeamCtrl', function ($scope, Teams, $ionicPopup, $ionicHistory, $cordovaFile, $cordovaCamera) {
     $scope.data = {};
-    var uri = '';
-    var options = {
-      width: 800,
-      height: 800,
-      quality: 50
-    };
-    var imgRoot;
+    var uri;
     $scope.imgPic = function() {
       console.log('Image Picker!!!');
       window.imagePicker.getPictures(
         function(results) {
           for (var i = 0; i < results.length; i++) {
             console.log('Image URI: ' + results[i]);
-            imgRoot = results;
+            uri = results;
           }
         }, function (error) {
           console.log('Error: ' + error);
@@ -139,14 +133,28 @@ angular.module('starter.controllers', ['ngCordova'])
           quality: 40
         }
       );
+      uri = uri.toString();
+    };
+    $scope.takePic = function(){
+      var options = {
+        destinationType: Camera.DestinationType.FILE_URI,
+        sourceType: Camera.PictureSourceType.CAMERA
+      };
+
+      $cordovaCamera.getPicture(options).then(function(imgPath){
+        uri = imgPath;
+        console.log(uri);
+      }, function(error){
+        console.log(error.code);
+        console.log(error.message);
+      });
     };
     $scope.submitButton = function () {
       if(!$scope.data.name||!$scope.data.number) var alertPopup = $ionicPopup.alert({title: 'You can\'t leave blanks!!!'});
       else if(typeof($scope.data.number)!=typeof (0)) var alertPopup = $ionicPopup.alert({title: 'Team number must be a number!!!'});
       else {
         console.log('Uploading!!!');
-        imgRoot = imgRoot.toString();
-        imgProcessing(imgRoot, $scope.data.number);
+        imgProcessing(uri, $scope.data.number);
       }
     };
     function imgProcessing(pathImg, name) {
@@ -159,7 +167,8 @@ angular.module('starter.controllers', ['ngCordova'])
           var blob = new Blob([success], {type: 'image/jpeg'});
           upload(blob, name);
         }, function (error) {
-          console.error(error);
+          console.log(error.code);
+          console.log(error.message);
         });
     }
     function upload(file, name) {
@@ -176,7 +185,6 @@ angular.module('starter.controllers', ['ngCordova'])
           $ionicHistory.goBack();
         });
     }
-
   })
   .controller('TeamsCtrl', function($scope, $http, $ionicHistory, $state, Teams, Matches, firebase, $ionicPopup) {
     // With the new view caching in Ionic, Controllers are only called
